@@ -5,8 +5,11 @@
 package it.polito.tdp.crimes;
 
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.crimes.model.Adiacenze;
 import it.polito.tdp.crimes.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,16 +28,16 @@ public class CrimesController {
     private URL location;
 
     @FXML // fx:id="boxCategoria"
-    private ComboBox<?> boxCategoria; // Value injected by FXMLLoader
+    private ComboBox<String> boxCategoria; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxGiorno"
-    private ComboBox<?> boxGiorno; // Value injected by FXMLLoader
+    private ComboBox<LocalDate> boxGiorno; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnAnalisi"
     private Button btnAnalisi; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxArco"
-    private ComboBox<?> boxArco; // Value injected by FXMLLoader
+    private ComboBox<Adiacenze> boxArco; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnPercorso"
     private Button btnPercorso; // Value injected by FXMLLoader
@@ -46,14 +49,33 @@ public class CrimesController {
     void doCreaGrafo(ActionEvent event) {
     	txtResult.clear();
     	txtResult.appendText("Crea grafo...\n");
+    	String categoria = this.boxCategoria.getValue();
+    	LocalDate data = this.boxGiorno.getValue();
+    	
+    	this.model.creaGrafo(categoria, data);
+    	txtResult.appendText("Numero Vertici  "+this.model.getNumVertici()+"\n");
+    	txtResult.appendText("Numero Archi  "+this.model.getNumArchi()+"\n");
+    	
+    	for (Adiacenze a1: this.model.getArchi())
+    	 	   txtResult.appendText("id1   "+a1.getId1()+"  id2  "+a1.getId2()+"  peso  "+a1.getPeso()+"\n");
+    	this.txtResult.appendText("****************\n");
+    	for (Adiacenze a : this.model.getArchiMediani())
+    	   txtResult.appendText("id1 "+a.getId1()+"id2 "+a.getId2()+"peso "+a.getPeso()+"\n");
+  
+    	this.boxArco.getItems().addAll(this.model.getArchiMediani());
     }
 
     @FXML
     void doCalcolaPercorso(ActionEvent event) {
-    	txtResult.clear();
-    	txtResult.appendText("Calcola percorso...\n");
-    }
 
+    	txtResult.appendText("Calcola percorso...\n");
+    	Adiacenze a = this.boxArco.getValue();
+    	for (String s : this.model.getCammino(a))
+    		txtResult.appendText(s+"\n");
+    	
+//    	for (String s : this.model.getVicini(a))
+//    		this.txtResult.appendText(s);
+    }
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
         assert boxCategoria != null : "fx:id=\"boxCategoria\" was not injected: check your FXML file 'Crimes.fxml'.";
@@ -67,5 +89,7 @@ public class CrimesController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	this.boxGiorno.getItems().addAll(model.getDate());
+    	this.boxCategoria.getItems().addAll(model.getCategorie());
     }
 }
